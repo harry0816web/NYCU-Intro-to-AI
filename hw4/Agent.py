@@ -12,9 +12,10 @@ chosen action.
 """
 
 class Agent:
-    def __init__(self, k, epsilon):
+    def __init__(self, k, epsilon, step_size = None):
         self.k = k
         self.epsilon = epsilon
+        self.step_size = step_size
         self.reset()
 
     def select_action(self):
@@ -28,10 +29,17 @@ class Agent:
     def update_q(self, action, reward):
         # update the number of times action was selected
         self.action_cnt[action] += 1
-        # update the total reward received for action
-        self.reward_sum[action] += reward
-        # update the estimated expected reward for action
-        self.q_values[action] = self.reward_sum[action] / self.action_cnt[action]
+
+        if self.step_size is None:
+            self.reward_sum[action] += reward
+            self.q_values[action] = self.reward_sum[action] / self.action_cnt[action]
+        else: 
+             # update the estimated expected reward of the chosen action
+            self.q_values[action] += self.step_size * (reward - self.q_values[action])
+            # update the total reward received for the chosen action
+            self.reward_sum[action] += reward
+            
+        
 
     def reset(self):
         # store estimated expected reward of each action
